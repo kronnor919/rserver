@@ -19,6 +19,10 @@ impl HttpResponse {
             body: body.to_string(),
         }
     }
+
+    pub fn headers(&self) -> &HttpHeaders {
+        &self.headers
+    }
 }
 
 impl Display for HttpResponse {
