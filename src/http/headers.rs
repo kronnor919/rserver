@@ -92,6 +92,10 @@ impl HttpHeaders {
     pub fn set_content_length(&mut self, content_length: usize) {
         self.content_length = content_length;
     }
+
+    pub fn set_content_type(&mut self, content_type: Option<ContentTypeHeader>) {
+        self.content_type = content_type;
+    }
 }
 
 impl From<&[String]> for HttpHeaders {
