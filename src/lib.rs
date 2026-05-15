@@ -5,5 +5,6 @@ pub use http::{
     methods::HttpMethod,
     request::HttpRequest,
     response::HttpResponse,
+    router::HttpRouter,
     status::{HttpStatus, ParseHttpStatusError},
 };
