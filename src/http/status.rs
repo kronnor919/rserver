@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use std::fmt::Display;
 
 pub enum ParseHttpStatusError {
