@@ -69,6 +69,14 @@ impl HttpHeaders {
         }
     }
 
+    pub fn new() -> Self {
+        HttpHeaders {
+            connection: ConnectionHeader::Close,
+            content_length: 0,
+            content_type: None,
+        }
+    }
+
     pub fn connection(&self) -> &ConnectionHeader {
         &self.connection
     }
