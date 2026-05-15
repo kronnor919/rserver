@@ -2,7 +2,7 @@
 
 use std::fmt::Display;
 
-pub enum FromHttpError {
+pub enum ParseHttpStatusError {
     UnkownStatusCode,
 }
 
@@ -284,7 +284,7 @@ impl HttpStatus {
 }
 
 impl TryFrom<u16> for HttpStatus {
-    type Error = FromHttpError;
+    type Error = ParseHttpStatusError;
 
     fn try_from(code: u16) -> Result<Self, Self::Error> {
         match code {
@@ -360,7 +360,7 @@ impl TryFrom<u16> for HttpStatus {
             510 => Ok(Self::not_extended()),
             511 => Ok(Self::network_authentication_required()),
 
-            _ => Err(FromHttpError::UnkownStatusCode),
+            _ => Err(ParseHttpStatusError::UnkownStatusCode),
         }
     }
 }
