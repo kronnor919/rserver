@@ -271,7 +271,6 @@ impl HttpStatus {
         Self::build(511, "Network Authentication Required")
     }
 
-    // Métodos útiles
     pub fn code(&self) -> u16 {
         self.code
     }
