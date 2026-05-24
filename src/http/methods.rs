@@ -36,3 +36,28 @@ impl Display for HttpMethod {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::HttpMethod;
+
+    #[test]
+    fn test_method_from_str() {
+        let strings = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"];
+
+        for method_str in strings {
+            let method = HttpMethod::from(method_str);
+
+            match method {
+                HttpMethod::Get => assert_eq!("GET", method_str),
+                HttpMethod::Post => assert_eq!("POST", method_str),
+                HttpMethod::Put => assert_eq!("PUT", method_str),
+                HttpMethod::Delete => assert_eq!("DELETE", method_str),
+                HttpMethod::Patch => assert_eq!("PATCH", method_str),
+                HttpMethod::Options => assert_eq!("OPTIONS", method_str),
+            };
+        }
+    }
+
+    // TODO: Implement test for method to string
+}
