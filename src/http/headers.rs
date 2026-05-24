@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ConnectionHeader {
     Close,
     KeepAlive,
@@ -25,7 +25,7 @@ impl Display for ConnectionHeader {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ContentTypeHeader {
     Json,
     Html,
@@ -53,7 +53,7 @@ impl Display for ContentTypeHeader {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct HttpHeaders {
     connection: ConnectionHeader,
     content_length: usize,
@@ -138,5 +138,41 @@ impl Display for HttpHeaders {
         }
 
         write!(f, "\r\n")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{ConnectionHeader, ContentTypeHeader, HttpHeaders};
+
+    #[test]
+    fn test_headers_parsing() {
+        let raw_headers: &str = "Content-Type: application/json\r\n\
+                     Content-Length: 1024\r\n\
+                     Connection: keep-alive\r\n";
+
+        let header_lines: Vec<String> = raw_headers[..].lines().map(|l| l.to_string()).collect();
+        let headers = HttpHeaders::from(&header_lines[..]);
+
+        let mut expected =
+            HttpHeaders::build(ConnectionHeader::KeepAlive, Some(ContentTypeHeader::Json));
+        expected.set_content_length(1024);
+
+        assert_eq!(headers, expected);
+    }
+
+    #[test]
+    fn test_headers_dumping() {
+        let mut headers =
+            HttpHeaders::build(ConnectionHeader::Close, Some(ContentTypeHeader::Json));
+        headers.set_content_length(1024);
+
+        let expected: &str = "Connection: close\r\n\
+                     Content-Length: 1024\r\n\
+                     Content-Type: application/json\r\n";
+
+        let headers_dumped = headers.to_string();
+
+        assert_eq!(expected, headers_dumped);
     }
 }
