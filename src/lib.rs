@@ -29,11 +29,7 @@ pub fn run(addr: &str, router: &HttpRouter) {
 
         let response = match view_function {
             Some(function) => function(),
-            None => HttpResponse::build(
-                "",
-                HttpStatus::not_found(),
-                HttpHeaders::build(ConnectionHeader::Close, None),
-            ),
+            None => HttpResponse::build("", HttpStatus::not_found(), HttpHeaders::new()),
         };
 
         stream
