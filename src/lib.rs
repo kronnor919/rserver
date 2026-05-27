@@ -28,7 +28,7 @@ pub fn run(addr: &str, router: &HttpRouter) {
         let view_function = router.get_route(route);
 
         let response = match view_function {
-            Some(function) => function(),
+            Some(function) => function(request),
             None => HttpResponse::build("", HttpStatus::not_found(), HttpHeaders::new()),
         };
 
