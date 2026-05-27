@@ -2,11 +2,12 @@ use std::collections::HashMap;
 
 use crate::{HttpMethod, HttpResponse};
 
-type ViewFunction = Box<dyn Fn() -> HttpResponse>;
+type RequestHandler = Box<dyn Fn() -> HttpResponse>;
 type Route = (HttpMethod, String);
+type RoutesMap = HashMap<Route, RequestHandler>;
 
 pub struct HttpRouter {
-    routes: HashMap<Route, ViewFunction>,
+    routes: RoutesMap,
 }
 
 impl HttpRouter {
@@ -15,35 +16,57 @@ impl HttpRouter {
         HttpRouter { routes }
     }
 
-    fn route(&mut self, method: HttpMethod, route: &str, view: ViewFunction) {
-        self.routes.insert((method, route.to_string()), view);
+    fn route<F>(&mut self, method: HttpMethod, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
+        self.routes
+            .insert((method, route.to_string()), Box::new(view));
     }
 
-    pub fn get(&mut self, route: &str, view: ViewFunction) {
+    pub fn get<F>(&mut self, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
         self.route(HttpMethod::Get, route, view);
     }
 
-    pub fn post(&mut self, route: &str, view: ViewFunction) {
+    pub fn post<F>(&mut self, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
         self.route(HttpMethod::Post, route, view);
     }
 
-    pub fn put(&mut self, route: &str, view: ViewFunction) {
+    pub fn put<F>(&mut self, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
         self.route(HttpMethod::Put, route, view);
     }
 
-    pub fn patch(&mut self, route: &str, view: ViewFunction) {
+    pub fn patch<F>(&mut self, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
         self.route(HttpMethod::Patch, route, view);
     }
 
-    pub fn delete(&mut self, route: &str, view: ViewFunction) {
+    pub fn delete<F>(&mut self, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
         self.route(HttpMethod::Delete, route, view);
     }
 
-    pub fn options(&mut self, route: &str, view: ViewFunction) {
+    pub fn options<F>(&mut self, route: &str, view: F)
+    where
+        F: Fn() -> HttpResponse + 'static,
+    {
         self.route(HttpMethod::Options, route, view);
     }
 
-    pub fn get_route(&self, route: Route) -> Option<&ViewFunction> {
+    pub fn get_route(&self, route: Route) -> Option<&RequestHandler> {
         self.routes.get(&route)
     }
 }
