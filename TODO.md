@@ -4,3 +4,4 @@
 - [ ] Implement more robust error handling
 - [x] Allow the user to access the request object within view functions
 - [ ] Implement unit tests
+- [ ] Add support to query args in `HttpRequest`
