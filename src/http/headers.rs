@@ -27,6 +27,7 @@ impl Display for ConnectionHeader {
 
 #[derive(Debug, PartialEq)]
 pub enum ContentTypeHeader {
+    None,
     Json,
     Html,
     PlainText,
@@ -38,7 +39,7 @@ impl From<&str> for ContentTypeHeader {
             "application/json" => Self::Json,
             "text/html" => Self::Html,
             "text/plain" => Self::PlainText,
-            _ => Self::PlainText,
+            _ => Self::None,
         }
     }
 }
@@ -49,6 +50,7 @@ impl Display for ContentTypeHeader {
             Self::PlainText => write!(f, "text/plain"),
             Self::Json => write!(f, "application/json"),
             Self::Html => write!(f, "text/html"),
+            Self::None => write!(f, ""),
         }
     }
 }
@@ -57,11 +59,11 @@ impl Display for ContentTypeHeader {
 pub struct HttpHeaders {
     connection: ConnectionHeader,
     content_length: usize,
-    content_type: Option<ContentTypeHeader>,
+    content_type: ContentTypeHeader,
 }
 
 impl HttpHeaders {
-    pub fn build(connection: ConnectionHeader, content_type: Option<ContentTypeHeader>) -> Self {
+    pub fn build(connection: ConnectionHeader, content_type: ContentTypeHeader) -> Self {
         HttpHeaders {
             connection,
             content_length: 0,
@@ -73,7 +75,7 @@ impl HttpHeaders {
         HttpHeaders {
             connection: ConnectionHeader::Close,
             content_length: 0,
-            content_type: None,
+            content_type: ContentTypeHeader::None,
         }
     }
 
@@ -81,8 +83,8 @@ impl HttpHeaders {
         &self.connection
     }
 
-    pub fn content_type(&self) -> Option<&ContentTypeHeader> {
-        self.content_type.as_ref()
+    pub fn content_type(&self) -> &ContentTypeHeader {
+        &self.content_type
     }
 
     pub fn content_length(&self) -> usize {
@@ -93,7 +95,7 @@ impl HttpHeaders {
         self.content_length = content_length;
     }
 
-    pub fn set_content_type(&mut self, content_type: Option<ContentTypeHeader>) {
+    pub fn set_content_type(&mut self, content_type: ContentTypeHeader) {
         self.content_type = content_type;
     }
 }
@@ -102,7 +104,7 @@ impl From<&[String]> for HttpHeaders {
     fn from(value: &[String]) -> Self {
         let mut connection = ConnectionHeader::Close;
         let mut content_length = 0;
-        let mut content_type = Some(ContentTypeHeader::PlainText);
+        let mut content_type = ContentTypeHeader::None;
 
         for header in value {
             let header_parts: Vec<&str> = header.split(": ").collect();
@@ -111,7 +113,7 @@ impl From<&[String]> for HttpHeaders {
 
             match header_name {
                 "Connection" => connection = ConnectionHeader::from(header_value),
-                "Content-Type" => content_type = Some(ContentTypeHeader::from(header_value)),
+                "Content-Type" => content_type = ContentTypeHeader::from(header_value),
                 "Content-Length" => content_length = header_value.parse().unwrap(),
                 _ => (),
             }
@@ -133,8 +135,8 @@ impl Display for HttpHeaders {
             self.connection, self.content_length,
         )?;
 
-        if let Some(content_type) = &self.content_type {
-            write!(f, "\r\nContent-Type: {}", content_type)?;
+        if self.content_type != ContentTypeHeader::None {
+            write!(f, "\r\nContent-Type: {}", self.content_type)?;
         }
 
         write!(f, "\r\n")
@@ -154,8 +156,7 @@ mod tests {
         let header_lines: Vec<String> = raw_headers[..].lines().map(|l| l.to_string()).collect();
         let headers = HttpHeaders::from(&header_lines[..]);
 
-        let mut expected =
-            HttpHeaders::build(ConnectionHeader::KeepAlive, Some(ContentTypeHeader::Json));
+        let mut expected = HttpHeaders::build(ConnectionHeader::KeepAlive, ContentTypeHeader::Json);
         expected.set_content_length(1024);
 
         assert_eq!(headers, expected);
@@ -163,8 +164,7 @@ mod tests {
 
     #[test]
     fn test_headers_dumping() {
-        let mut headers =
-            HttpHeaders::build(ConnectionHeader::Close, Some(ContentTypeHeader::Json));
+        let mut headers = HttpHeaders::build(ConnectionHeader::Close, ContentTypeHeader::Json);
         headers.set_content_length(1024);
 
         let expected: &str = "Connection: close\r\n\
