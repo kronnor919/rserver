@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-use crate::http::{headers::HttpHeaders, status::HttpStatus};
+use crate::{
+    ConnectionHeader, ContentTypeHeader,
+    http::{headers::HttpHeaders, status::HttpStatus},
+};
 
 #[derive(Debug)]
 pub struct HttpResponse {
@@ -20,8 +23,19 @@ impl HttpResponse {
         }
     }
 
-    pub fn headers(&self) -> &HttpHeaders {
-        &self.headers
+    pub fn new(body: &str, status: HttpStatus) -> Self {
+        let headers =
+            HttpHeaders::build(ConnectionHeader::Close, body.len(), ContentTypeHeader::Json);
+
+        HttpResponse {
+            status,
+            headers,
+            body: body.to_string(),
+        }
+    }
+
+    pub fn headers_mut(&mut self) -> &mut HttpHeaders {
+        &mut self.headers
     }
 }
 

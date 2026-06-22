@@ -63,10 +63,14 @@ pub struct HttpHeaders {
 }
 
 impl HttpHeaders {
-    pub fn build(connection: ConnectionHeader, content_type: ContentTypeHeader) -> Self {
+    pub fn build(
+        connection: ConnectionHeader,
+        content_length: usize,
+        content_type: ContentTypeHeader,
+    ) -> Self {
         HttpHeaders {
             connection,
-            content_length: 0,
+            content_length,
             content_type,
         }
     }
@@ -156,16 +160,15 @@ mod tests {
         let header_lines: Vec<String> = raw_headers[..].lines().map(|l| l.to_string()).collect();
         let headers = HttpHeaders::from(&header_lines[..]);
 
-        let mut expected = HttpHeaders::build(ConnectionHeader::KeepAlive, ContentTypeHeader::Json);
-        expected.set_content_length(1024);
+        let expected =
+            HttpHeaders::build(ConnectionHeader::KeepAlive, 1024, ContentTypeHeader::Json);
 
         assert_eq!(headers, expected);
     }
 
     #[test]
     fn test_headers_dumping() {
-        let mut headers = HttpHeaders::build(ConnectionHeader::Close, ContentTypeHeader::Json);
-        headers.set_content_length(1024);
+        let headers = HttpHeaders::build(ConnectionHeader::Close, 1024, ContentTypeHeader::Json);
 
         let expected: &str = "Connection: close\r\n\
                      Content-Length: 1024\r\n\
